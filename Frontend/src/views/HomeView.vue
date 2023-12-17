@@ -1,85 +1,98 @@
 <template>
   <div class="header">
     <div class="container">
-     
-    <button v-if = "authResult" @click="Logout" class="center">Logout</button>
+      <button v-if="authResult" @click="Logout" class="center">Logout</button>
     </div>
-    <div class="post-list" v-for="post in posts"   :key="post.index">  
+    <div class="post-list" v-for="post in posts" :key="post.id">
       <div class="post">
-          <h3>  Title:  {{post.title}} </h3>
-          <p>  <b> Body: </b> {{post.body}} </p>
+        <h3>Title: {{ post.title }}</h3>
+        <p><b>Body:</b> {{ post.body }}</p>
       </div>
     </div>
   </div>
-  <button v-if = "authResult" @click="AddPost" class="center">Add Post</button>
-  <button v-if = "authResult" @click="DeleteAll" class="center">Deleta All</button>
+  <button v-if="authResult" @click="AddPost" class="center">Add Post</button>
+  <button v-if="authResult" @click="DeleteAll" class="center">Delete All</button>
 </template>
 
 <script>
-// @ is an alias to /src
 import auth from "../auth";
 
 export default {
   name: "HomeView",
-  components: {
-  },
-   data: function() {
+  data() {
     return {
-    posts:[ ],
-    authResult: auth.authenticated()
-    }
+      posts: [],
+      authResult: auth.authenticated()
+    };
   },
   methods: {
-    DeleteAll(){
-      console.log("Deleted")
+    async DeleteAll() {
+      console.log("Deleted");
     },
     AddPost() {
-      this.$router.push("/addpost")
+      this.$router.push("/addpost");
     },
     Logout() {
       fetch("http://localhost:3000/auth/logout", {
-          credentials: 'include', //  Don't forget to specify this if you need cookies
+        credentials: "include", // Don't forget to specify this if you need cookies
       })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        console.log('jwt removed');
-        //console.log('jwt removed:' + auth.authenticated());
-        this.$router.push("/login");
-        //location.assign("/");
-      })
-      .catch((e) => {
-        console.log(e);
-        console.log("error logout");
-      });
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            console.log("jwt removed");
+            this.$router.push("/login");
+          })
+          .catch((e) => {
+            console.log(e);
+            console.log("error logout");
+          });
     },
-  }, 
-  mounted() {
-        fetchPosts();
-    }
-};
-
-const fetchPosts = async () => {
-    try {
-        const response = await fetch('http://localhost:3000/posts', {
-            method: 'GET',
-            credentials: 'include', // Make sure to include credentials for cookie-based authentication
-            headers: {
-                'Content-Type': 'application/json',
-            },
+    async fetchPosts() {
+      try {
+        const response = await fetch("http://localhost:3000/getposts", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
 
         if (!response.ok) {
-            throw new Error('Failed to fetch posts');
+          throw new Error(`Failed to fetch posts: ${response.status} - ${response.statusText}`);
         }
 
-        const posts = await response.json();
-        console.log(posts); // Use the posts data as needed in your frontend
-    } catch (error) {
+        const fetchedPosts = await response.json();
+        this.posts = fetchedPosts;
+      } catch (error) {
         console.error(error.message);
-    }
-};
+        // Add additional error handling or logging as needed
+      }
+    },
+    async fetchAndInsertPosts() {
+      try {
+        const response = await fetch('http://localhost:3000/fetch-and-insert-posts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(response);
+        if (!response.ok) {
+          throw new Error('Failed to fetch and insert posts');
+        }
 
+        // Posts fetched and inserted successfully
+        console.log('Posts fetched and inserted successfully');
+      } catch (error) {
+        console.error('Error fetching and inserting posts:', error);
+      }
+    },
+  },
+  mounted() {
+    this.fetchPosts(); // Fetch posts when the component is mounted
+    this.fetchAndInsertPosts();
+  },
+};
 </script>
 
 <style scoped>

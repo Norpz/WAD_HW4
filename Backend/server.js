@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000;
 
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:8080', credentials: true }));
+app.use(cors({ origin: 'http://localhost:8081', credentials: true }));
 // We need to include "credentials: true" to allow cookies to be represented  
 // Also "credentials: 'include'" need to be added in Fetch API in the Vue.js App
 
@@ -126,24 +126,26 @@ app.get('/auth/logout', (req, res) => {
     res.status(202).clearCookie('jwt').json({ "Msg": "cookie cleared" }).send
 });
 
-app.get('/posts', async (req, res) => {
+// Endpoint to fetch data from the 'posts' table
+app.get('/getposts', async (req, res) => {
     try {
-        const posts = await pool.query('SELECT * FROM posts ORDER BY created_at DESC');
-        res.json(posts.rows);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Internal Server Error');
+        const posts = await pool.query('SELECT * FROM posts'); // Modify the query as needed
+
+        res.status(200).json(posts.rows); // Sending the retrieved data as a JSON response
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch posts' });
     }
 });
 
+
 app.post('/posts', async (req, res) => {
     try {
-        const { body } = req.body;
-        const user_id = req.user;
+        const { title, author, create_time, content, image_url, image_author_url } = req.body;
 
         const newPost = await pool.query(
-            'INSERT INTO posts (user_id, body) VALUES ($1, $2) RETURNING *',
-            [user_id, body]
+            'INSERT INTO posts (title, author, create_time, content, image_url, image_author_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [title, author, create_time, content, image_url, image_author_url]
         );
 
         res.json(newPost.rows[0]);
@@ -152,3 +154,29 @@ app.post('/posts', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
+const fetch = require('node-fetch');
+
+// Endpoint to fetch data from JSON and insert into the 'posts' table
+app.post('/fetch-and-insert-posts', async (req, res) => {
+    try {
+        const response = await fetch('https://api.npoint.io/310271b6e51d1b11206b');
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from the JSON API');
+        }
+
+        const jsonData = await response.json();
+
+        // Insert each post from the JSON data into the 'posts' table
+        for (const post of jsonData) {
+            const { title, author, create_time, content, image_url, image_author_url } = post;
+            await pool.query('INSERT INTO posts (title, author, create_time, content, image_url, image_author_url) VALUES ($1, $2, $3, $4, $5, $6)', [title, author, create_time, content, image_url, image_author_url]);
+        }
+
+        res.status(200).json({ message: 'Posts fetched and inserted successfully' });
+    } catch (error) {
+        console.error('Error fetching and inserting posts:', error);
+        res.status(500).json({ error: 'Failed to fetch and insert posts' });
+    }
+});
+
