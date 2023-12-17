@@ -55,12 +55,31 @@ export default {
     },
   }, 
   mounted() {
-        fetch('https://jsonplaceholder.typicode.com/posts')
-        .then((response) => response.json())
-        .then(data => this.posts = data)
-        .catch(err => console.log(err.message))
+        fetchPosts();
     }
 };
+
+const fetchPosts = async () => {
+    try {
+        const response = await fetch('http://localhost:3000/posts', {
+            method: 'GET',
+            credentials: 'include', // Make sure to include credentials for cookie-based authentication
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch posts');
+        }
+
+        const posts = await response.json();
+        console.log(posts); // Use the posts data as needed in your frontend
+    } catch (error) {
+        console.error(error.message);
+    }
+};
+
 </script>
 
 <style scoped>

@@ -31,9 +31,22 @@ const createTblQuery = `
         password VARCHAR(200) NOT NULL 
     );`;
 
+const createPostsTable=  `
+CREATE TABLE IF NOT EXISTS "posts" (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    body TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);`;
+
 execute(createTblQuery).then(result => {
     if (result) {
         console.log('Table "users" is created');
+    }
+});
+
+execute(createPostsTable).then(result => {
+    if (result) {
+        console.log('Table "posts" is created');
     }
 });
 

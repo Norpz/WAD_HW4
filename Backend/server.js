@@ -125,3 +125,30 @@ app.get('/auth/logout', (req, res) => {
     console.log('delete jwt request arrived');
     res.status(202).clearCookie('jwt').json({ "Msg": "cookie cleared" }).send
 });
+
+app.get('/posts', async (req, res) => {
+    try {
+        const posts = await pool.query('SELECT * FROM posts ORDER BY created_at DESC');
+        res.json(posts.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.post('/posts', async (req, res) => {
+    try {
+        const { body } = req.body;
+        const user_id = req.user;
+
+        const newPost = await pool.query(
+            'INSERT INTO posts (user_id, body) VALUES ($1, $2) RETURNING *',
+            [user_id, body]
+        );
+
+        res.json(newPost.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Internal Server Error');
+    }
+});
