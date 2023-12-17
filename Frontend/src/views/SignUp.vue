@@ -15,18 +15,6 @@
         <label for="password">Password </label>
         <input type="password" id="password" placeholder="Password" required v-model="password" @input="validatePassword">
 
-        <div v-if="!isPasswordValid" class="validation-message">
-          <p><strong> Password is not valid. Please follow these conditions: </strong></p>
-          <ul>
-            <li>Password should be at least 8 characters and less than 15 characters.</li>
-            <li>Should include at least one uppercase alphabet character.</li>
-            <li>Should include at least two lowercase alphabet characters.</li>
-            <li>Should include at least one numeric value.</li>
-            <li>Should start with an uppercase alphabet.</li>
-            <li>Should include the character "_"</li>
-          </ul>
-        </div>
-
       </div>
       <div>
         <br>
@@ -69,7 +57,6 @@ SignUp() {
       .then((data) => {
       console.log(data);
       this.$router.push("/");
-      //location.assign("/");
       })
       .catch((e) => {
         console.log(e);

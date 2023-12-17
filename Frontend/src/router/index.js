@@ -39,6 +39,20 @@ const routes = [{
         component: () =>
             import ( /* webpackChunkName: "about" */ "../views/ContactsView.vue"),
     },
+    {
+        path: "/addpost",
+        name: "AddPostView",
+        component: () =>
+            import ("../views/AddPostView.vue"),
+        beforeEnter: async(to, from, next) => {
+            let authResult = await auth.authenticated();
+            if (!authResult) {
+                next('/login')
+            } else {
+                next();
+            }
+        }
+    }
 ];
 
 const router = createRouter({

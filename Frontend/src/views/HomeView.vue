@@ -1,6 +1,7 @@
 <template>
   <div class="header">
     <div class="container">
+     
     <button v-if = "authResult" @click="Logout" class="center">Logout</button>
     </div>
     <div class="post-list" v-for="post in posts"   :key="post.index">  
@@ -10,6 +11,8 @@
       </div>
     </div>
   </div>
+  <button v-if = "authResult" @click="AddPost" class="center">Add Post</button>
+  <button v-if = "authResult" @click="DeleteAll" class="center">Deleta All</button>
 </template>
 
 <script>
@@ -27,6 +30,12 @@ export default {
     }
   },
   methods: {
+    DeleteAll(){
+      console.log("Deleted")
+    },
+    AddPost() {
+      this.$router.push("/addpost")
+    },
     Logout() {
       fetch("http://localhost:3000/auth/logout", {
           credentials: 'include', //  Don't forget to specify this if you need cookies
