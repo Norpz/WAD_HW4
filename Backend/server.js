@@ -141,11 +141,11 @@ app.get('/auth/getposts', async (req, res) => {
 
 app.post('/auth/posts', async (req, res) => {
     try {
-        const { title, author, create_time, content, image_url, image_author_url } = req.body;
+        const { title, author, create_time, content, image_url} = req.body;
 
         const newPost = await pool.query(
-            'INSERT INTO posts (title, author, create_time, content, image_url, image_author_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [title, author, create_time, content, image_url, image_author_url]
+            'INSERT INTO posts (title, author, create_time, content, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [title, author, create_time, content, image_url]
         );
 
         res.json(newPost.rows[0]);
@@ -169,8 +169,8 @@ app.post('/auth/fetch-and-insert-posts', async (req, res) => {
 
         // Insert each post from the JSON data into the 'posts' table
         for (const post of jsonData) {
-            const { title, author, create_time, content, image_url, image_author_url } = post;
-            await pool.query('INSERT INTO posts (title, author, create_time, content, image_url, image_author_url) VALUES ($1, $2, $3, $4, $5, $6)', [title, author, create_time, content, image_url, image_author_url]);
+            const { title, author, create_time, content, image_url} = post;
+            await pool.query('INSERT INTO posts (title, author, create_time, content, image_url) VALUES ($1, $2, $3, $4, $5)', [title, author, create_time, content, image_url]);
         }
 
         res.status(200).json({ message: 'Posts fetched and inserted successfully' });
@@ -189,5 +189,60 @@ app.delete('/auth/delete-all-posts', async (req, res) =>{
         console.error('Error deleting posts:', error);
         res.status(500).json({ error: 'Failed to delete posts' });
     }
-})
+});
+
+app.delete("/posts/:postId", async (req, res) => {
+    const postId = req.params.postId;
+  
+    try {
+      // Query the database to delete the post based on postId
+      const deletedPost = await yourDatabaseQueryToDeletePost(postId);
+  
+      if (!deletedPost) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+  
+      res.json({ message: "Post deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
+
+  app.put("/posts/:postId", async (req, res) => {
+    const postId = req.params.postId;
+    const updatedContent = req.body.content; // Adjust based on your data structure
+  
+    try {
+      // Query the database to update the post based on postId
+      const updatedPost = await yourDatabaseQueryToUpdatePost(postId, updatedContent);
+  
+      if (!updatedPost) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+  
+      res.json(updatedPost);
+    } catch (error) {
+      console.error("Error updating post:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
+
+  app.get("/posts/:postId", async (req, res) => {
+    const postId = req.params.postId;
+  
+    try {
+      // Query the database to get the post details based on postId
+      const post = await yourDatabaseQueryToFetchPost(postId);
+  
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+  
+      res.json(post);
+    } catch (error) {
+      console.error("Error fetching post:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
 

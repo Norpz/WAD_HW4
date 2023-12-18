@@ -39,7 +39,6 @@ CREATE TABLE IF NOT EXISTS posts (
     create_time TEXT,
     content TEXT,
     image_url TEXT,
-    image_author_url TEXT,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );`;
 

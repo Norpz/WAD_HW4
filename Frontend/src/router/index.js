@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import SignUp from "../views/SignUp.vue";
 import LogIn from "../views/LogIn.vue";
+//import PostPageView from "../views/PostPageView.vue";
 import auth from "../auth";
 
 
@@ -20,6 +21,20 @@ const routes = [{
             }
         }
     },
+    {
+        path: '/post/:postId',
+        name: 'PostPageView',
+        component: () =>
+            import ("../views/PostPageView.vue"),
+        props: route => ({
+          postId: route.params.postId,
+          postContent: route.query.postContent,
+          postAuthor: route.query.postAuthor,
+          postCreateTime: route.query.postCreateTime,
+          postImgUrl: route.query.postImgUrl,
+          // pass other props directly if needed
+        }),
+      },
     {
         path: "/signup",
         name: "SignUp",

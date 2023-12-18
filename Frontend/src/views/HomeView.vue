@@ -3,10 +3,9 @@
     <div class="container">
       <button v-if="authResult" @click="Logout" class="center">Logout</button>
     </div>
-    <div class="post-list" v-for="post in posts" :key="post.id">
-      <div class="post" @click="goToPostPage">
+    <div class="post-list" v-for="post in posts" :key="post.id" @click="goToPostPage(post)">
+      <div class="post">
         <div class="user-profile">
-          <img :src="post.imageAuthor_url" alt="User Profile Picture" v-if="post.imageAuthor_url" />
           {{ post.author }}
         </div>
         <div class="date">
@@ -36,8 +35,12 @@ export default {
     };
   },
   methods: {
-    goToPostPage(){
-      this.$router.push("/postpage");
+    goToPostPage(post){
+      this.$router.push({
+      name: 'PostPageView',
+      params: { postId: post.id },
+      query: { postContent: post.content, postAuthor: post.author, postCreateTime: post.create_time, postImgUrl: post.image_url},
+    });
     },
     async CreatePosts(){
       try {
