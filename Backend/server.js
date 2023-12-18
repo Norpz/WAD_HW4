@@ -24,6 +24,9 @@ const generateJWT = (id) => {
         //jwt.sign(payload, secret, [options, callback]), and it returns the JWT as string
 }
 
+
+
+
 app.listen(port, () => {
     console.log("Server is listening to port " + port)
 });
