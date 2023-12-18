@@ -1,22 +1,24 @@
 <template>
   <div class="signup">
     <form class="loginForm" @submit.prevent="submitForm">
-    <div class="formHeader">
-      <p><strong>Welcome to RAM OÜ</strong></p>
-      <p>Login</p>
-    </div>
-    <div class="formBody">
-      <label for="email">Email </label>
-      <input type="text" name="email" placeholder="Email" required v-model="email">
-      <br><br>
-      <label for="password">Password </label>
-      <input type="password" name="password" placeholder="Password" required v-model="password">
-    </div>
-      <br><br>
-    <div class="container">
-      <button @click="LogIn"  class="center">LogIn</button>
-      <button @click='this.$router.push("/signup")' class="center">Signup</button>
-    </div>
+      <div class="formHeader">
+        <p><strong>Welcome to RAM OÜ</strong></p>
+        <p>Login</p>
+      </div>
+      <div class="formBody">
+        <div class="inputField">
+          <label for="email">Email</label>
+          <input type="text" name="email" placeholder="Email" required v-model="email">
+        </div>
+        <div class="inputField">
+          <label for="password">Password</label>
+          <input type="password" name="password" placeholder="Password" required v-model="password">
+        </div>
+      </div>
+      <div class="container">
+        <button @click="LogIn" class="center">LogIn</button>
+        <button @click='this.$router.push("/signup")' class="center">Signup</button>
+      </div>
     </form>
   </div>
 </template>
@@ -92,9 +94,56 @@ ul{
 div button {
   margin: 5px;
   margin-bottom: 15px;
-  padding: 0 10px;
+  padding: 8px 16px; /* Adjust padding for better appearance */
   text-align: center;
-  font: bold 14px/25px Arial, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 1.5;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Use a modern font */
+  border: none;
+  border-radius: 4px;
+  background-color: #aa8f38; /* Button background color */
+  color: #ffffff; /* Text color */
+  cursor: pointer;
+  transition: background-color 0.3s ease; 
+}
+
+div button:hover {
+  background-color: #bfba5e; /* Change background color on hover */
+}
+
+.inputField {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.inputField label {
+
+  width: 100%; /* Adjust the width as needed */
+  /*margin: 0px; /* Center the input boxes */
+  padding: 8px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.inputField input[type="text"],
+.inputField input[type="password"] {
+  width: 20%; /* Adjust the width as needed */
+  margin: 0 auto; /* Center the input boxes */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box; /* Include padding and border in the width */
+}
+
+.inputField input[type="text"]:focus,
+.inputField input[type="password"]:focus {
+  outline: none;
+  border-color: #bfba5e; /* Change border color on focus */
 }
 
 .loginForm a{

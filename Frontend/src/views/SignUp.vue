@@ -95,10 +95,23 @@ ul{
 div button {
   margin: 5px;
   margin-bottom: 15px;
-  padding: 0 10px;
+  padding: 8px 16px; /* Adjust padding for better appearance */
   text-align: center;
-  font: bold 14px/25px Arial, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 1.5;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Use a modern font */
+  border: none;
+  border-radius: 4px;
+  background-color: #aa8f38; /* Button background color */
+  color: #ffffff; /* Text color */
+  cursor: pointer;
+  transition: background-color 0.3s ease; 
 }
+
+div button:hover {
+  background-color: #bfba5e; /* Change background color on hover */
+}s
 
 .loginForm a{
   font: bold 16px/30px Arial, sans-serif;
