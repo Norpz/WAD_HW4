@@ -4,14 +4,24 @@
       <button v-if="authResult" @click="Logout" class="center">Logout</button>
     </div>
     <div class="post-list" v-for="post in posts" :key="post.id">
-      <div class="post">
-        <h3>Title: {{ post.title }}</h3>
-        <p><b>Body:</b> {{ post.body }}</p>
+      <div class="post" @click="goToPostPage">
+        <div class="user-profile">
+          <img :src="post.imageAuthor_url" alt="User Profile Picture" v-if="post.imageAuthor_url" />
+          {{ post.author }}
+        </div>
+        <div class="date">
+          {{ post.create_time }}
+        </div>
+        <p>{{ post.content }}</p>
+        <div class="post-image">
+          <img :src="post.image_url" alt="Post Image" class="post-image" v-if="post.image_url" />
+        </div>
       </div>
     </div>
   </div>
   <button v-if="authResult" @click="AddPost" class="center">Add Post</button>
   <button v-if="authResult" @click="DeleteAll" class="center">Delete All</button>
+  <button v-if="authResult" @click="CreatePosts" class="center">Create Posts</button>
 </template>
 
 <script>
@@ -26,8 +36,48 @@ export default {
     };
   },
   methods: {
+    goToPostPage(){
+      this.$router.push("/postpage");
+    },
+    async CreatePosts(){
+      try {
+        const response = await fetch('http://localhost:3000/auth/fetch-and-insert-posts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(response);
+        if (!response.ok) {
+          throw new Error('Failed to fetch and insert posts');
+        }
+        // Posts fetched and inserted successfully
+        window.location.reload();
+        console.log('Posts fetched and inserted successfully');
+      } catch (error) {
+        console.error('Error fetching and inserting posts:', error);
+      }
+    },
     async DeleteAll() {
-      console.log("Deleted");
+      try {
+        const response = await fetch('http://localhost:3000/auth/delete-all-posts', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            // Include any additional headers if needed (e.g., authorization headers)
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete posts');
+        }
+
+        const data = await response.json();
+        console.log(data.message); // Log the success message
+        window.location.reload();
+      } catch (error) {
+        console.error('Error:', error.message);
+      }
     },
     AddPost() {
       this.$router.push("/addpost");
@@ -49,7 +99,7 @@ export default {
     },
     async fetchPosts() {
       try {
-        const response = await fetch("http://localhost:3000/getposts", {
+        const response = await fetch("http://localhost:3000/auth/getposts", {
           method: "GET",
           credentials: "include",
           headers: {
@@ -68,113 +118,101 @@ export default {
         // Add additional error handling or logging as needed
       }
     },
-    async fetchAndInsertPosts() {
-      try {
-        const response = await fetch('http://localhost:3000/fetch-and-insert-posts', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        console.log(response);
-        if (!response.ok) {
-          throw new Error('Failed to fetch and insert posts');
-        }
-
-        // Posts fetched and inserted successfully
-        console.log('Posts fetched and inserted successfully');
-      } catch (error) {
-        console.error('Error fetching and inserting posts:', error);
-      }
-    },
   },
   mounted() {
     this.fetchPosts(); // Fetch posts when the component is mounted
-    this.fetchAndInsertPosts();
   },
 };
 </script>
 
 <style scoped>
-body{
-  margin: 20px 40px;
-  font-size: 1.2rem;
-  letter-spacing: 1px;
-  background: #fafafa;
+*{
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+div button {
+  margin: 5px;
+  margin-bottom: 15px;
+  padding: 0 10px;
+  text-align: center;
+  font: bold 14px/25px Arial, sans-serif;
+}
+
+
+.post-container {
+  margin: 20px;
+  text-align: center;
+}
+
+.post {
+  border: 1px solid #EAD7BB;
+  padding: 10px;
+  margin-bottom: 20px;
   position: relative;
+  background-color: #EAD7BB;
+  max-width: 500px;
+  margin: auto;
+  border-radius: 20px 20px 20px 20px;
+  margin-top: 10px;
 }
-.post-list{
-  background: rgb(189, 212, 199);
-  margin-bottom: 5px;
-  padding: 3px 5px;
-  border-radius: 10px;
-}
-h3{
-    margin: 0;
-  padding: 0;
-  font-family: 'Quicksand', sans-serif;
-  color: #444;
-  background: #7e9756;
-}
-p{
-  background: #796dbd;
-}
-h1, h2, h3, h4, ul, li, a, input, label, button, div, footer{
-  margin: 0;
-  padding: 0;
-  font-family: 'Quicksand', sans-serif;
-  color: #444;
-}
-nav{
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 80px;
-}
-input{
-  padding: 10px 12px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  font-size: 1em;
-  width: 100%;
-}
-label{
-  display: block;
-  margin: 20px 0 10px;
-}
-button{
-  margin-top: 30px;
-  border-radius: 36px;
-  background: #FEE996;
-  border:0;
-  font-weight: 700;
-  font-size: 0.8em;
-  display: block;
-  padding: 10px 16px;
-  letter-spacing: 2px;
-}
-nav{
+
+.user-profile {
   display: flex;
   align-items: center;
+  margin-bottom: 10px;
+  background-color: #BCA37F;
+  border:1px solid #BCA37F;
+  padding: 10px;
+  border-radius: 20px 20px 20px 20px;
 }
-.post {
-    width: 80%;
-    position: relative;
-    padding: 10px;
-    margin: 10px auto;
-    border: 1px solid gray;
-    text-align: left;
+
+.user-profile img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
 }
-.center {
-  margin: auto;
-  border: 0;
-  padding: 10px 20px;
-  margin-top: 20px;
-  margin: 10px auto;
-  width: 30%; 
+
+.post-image img {
+  width: 100%;
+  display: block;
+  margin-bottom: 10px;
 }
-.container {
-  display: flex;
-  justify-content: center;
+
+.caption {
+  font-size: 16px;
+  text-align: left;
 }
+
+.date {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: small;
+  background-color: #dfcdb4;
+  border: 1px solid #dfccb1;
+  padding: 1px 5px;
+  border-radius: 0px 15px 0px 15px;
+}
+
+
+.likeDiv {
+  text-align: right;
+}
+
+.like {
+  width: 7%;
+  height: 7%;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+@media (min-width: 600px) {
+  .post-container {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 </style>

@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000;
 
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:8081', credentials: true }));
+app.use(cors({ origin: 'http://localhost:8080', credentials: true }));
 // We need to include "credentials: true" to allow cookies to be represented  
 // Also "credentials: 'include'" need to be added in Fetch API in the Vue.js App
 
@@ -127,7 +127,7 @@ app.get('/auth/logout', (req, res) => {
 });
 
 // Endpoint to fetch data from the 'posts' table
-app.get('/getposts', async (req, res) => {
+app.get('/auth/getposts', async (req, res) => {
     try {
         const posts = await pool.query('SELECT * FROM posts'); // Modify the query as needed
 
@@ -139,7 +139,7 @@ app.get('/getposts', async (req, res) => {
 });
 
 
-app.post('/posts', async (req, res) => {
+app.post('/auth/posts', async (req, res) => {
     try {
         const { title, author, create_time, content, image_url, image_author_url } = req.body;
 
@@ -158,7 +158,7 @@ app.post('/posts', async (req, res) => {
 const fetch = require('node-fetch');
 
 // Endpoint to fetch data from JSON and insert into the 'posts' table
-app.post('/fetch-and-insert-posts', async (req, res) => {
+app.post('/auth/fetch-and-insert-posts', async (req, res) => {
     try {
         const response = await fetch('https://api.npoint.io/310271b6e51d1b11206b');
         if (!response.ok) {
@@ -179,4 +179,15 @@ app.post('/fetch-and-insert-posts', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch and insert posts' });
     }
 });
+
+app.delete('/auth/delete-all-posts', async (req, res) =>{
+    try {
+        await pool.query('DELETE FROM posts'); // Deletes all rows from the 'posts' table
+
+        res.status(200).json({ message: 'All posts deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting posts:', error);
+        res.status(500).json({ error: 'Failed to delete posts' });
+    }
+})
 
