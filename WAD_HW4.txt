@@ -1,0 +1,8 @@
+Web Application Development 2023
+Homework 4
+
+Team: BJ
+Group: 7
+Team members: Kristjan Madis Kask, Robert Valge, Argo Aljand
+
+GitHub link: https://github.com/Norpz/WAD_HW4
