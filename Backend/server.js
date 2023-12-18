@@ -155,8 +155,34 @@ app.post('/auth/posts', async (req, res) => {
     }
 });
 
+app.post('/auth/addPost', async (req, res) => {
+    try {
+        const { title, content, image_url, imageauthor_url } = req.body;
+        let { author } = req.body;
+
+        // If author is not provided in the request body, set it as "anonymous"
+        if (!author) {
+            author = 'User';
+        }
+
+        // Obtain the current timestamp in ISO format
+        const currentTimestamp = new Date().toLocaleString(); // Convert to local date and time
+
+        const newPost = await pool.query(
+            'INSERT INTO posts (title, author, create_time, content, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [title, author, currentTimestamp, content, image_url]
+        );
+
+        res.json(newPost.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 const fetch = require('node-fetch');
 
+// Endpoint to fetch data from JSON and insert into the 'posts' table
 // Endpoint to fetch data from JSON and insert into the 'posts' table
 app.post('/auth/fetch-and-insert-posts', async (req, res) => {
     try {
@@ -166,17 +192,18 @@ app.post('/auth/fetch-and-insert-posts', async (req, res) => {
         }
 
         const jsonData = await response.json();
+        const currentTimestamp = new Date().toLocaleString(); // Convert to local date and time
 
         // Insert each post from the JSON data into the 'posts' table
         for (const post of jsonData) {
-            const { title, author, create_time, content, image_url} = post;
-            await pool.query('INSERT INTO posts (title, author, create_time, content, image_url) VALUES ($1, $2, $3, $4, $5)', [title, author, create_time, content, image_url]);
+            const {title, author, create_time, content, image_url} = post;
+            await pool.query('INSERT INTO posts (title, author, create_time, content, image_url) VALUES ($1, $2, $3, $4, $5)', [title, author, currentTimestamp, content, image_url]);
         }
 
-        res.status(200).json({ message: 'Posts fetched and inserted successfully' });
+        res.status(200).json({message: 'Posts fetched and inserted successfully'});
     } catch (error) {
         console.error('Error fetching and inserting posts:', error);
-        res.status(500).json({ error: 'Failed to fetch and insert posts' });
+        res.status(500).json({error: 'Failed to fetch and insert posts'});
     }
 });
 
@@ -191,7 +218,7 @@ app.delete('/auth/delete-all-posts', async (req, res) =>{
     }
 });
 
-app.delete("/posts/:postId", async (req, res) => {
+app.delete("/deleteposts/:postId", async (req, res) => {
     const postId = req.params.postId;
   
     try {
@@ -209,10 +236,37 @@ app.delete("/posts/:postId", async (req, res) => {
     }
   });
 
-  app.put("/posts/:postId", async (req, res) => {
+  // Function to delete a post from the database based on postId
+const yourDatabaseQueryToDeletePost = async (postId) => {
+    const client = await pool.connect();
+    try {
+      // Start a transaction
+      await client.query('BEGIN');
+  
+      // Perform the delete operation
+      const deleteQuery = 'DELETE FROM posts WHERE id = $1 RETURNING *';
+      const result = await client.query(deleteQuery, [postId]);
+  
+      // Commit the transaction
+      await client.query('COMMIT');
+  
+      // Return the deleted post
+      return result.rows[0];
+    } catch (error) {
+      // Rollback the transaction in case of an error
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      // Release the client back to the pool
+      client.release();
+    }
+  };
+
+
+  app.put("/updateposts/:postId", async (req, res) => {
     const postId = req.params.postId;
     const updatedContent = req.body.content; // Adjust based on your data structure
-  
+    
     try {
       // Query the database to update the post based on postId
       const updatedPost = await yourDatabaseQueryToUpdatePost(postId, updatedContent);
@@ -227,6 +281,34 @@ app.delete("/posts/:postId", async (req, res) => {
       res.status(500).json({ error: "Internal Server Error" });
     }
   });
+
+  const yourDatabaseQueryToUpdatePost = async (postId, updatedContent) => {
+    const client = await pool.connect();
+    const currentTimestamp = new Date().toLocaleString(); // Convert to local date and time
+  
+    try {
+        // Start a transaction
+        await client.query('BEGIN');
+
+        // Perform the update operation
+        const updateQuery = 'UPDATE posts SET content = $1, create_time = $2 WHERE id = $3 RETURNING *';
+        const result = await client.query(updateQuery, [updatedContent, currentTimestamp, postId]);
+
+        // Commit the transaction
+        await client.query('COMMIT');
+
+        // Return the updated post (check if rows exist before accessing the first element)
+        return result.rows.length > 0 ? result.rows[0] : null;
+    } catch (error) {
+        // Rollback the transaction in case of an error
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        // Release the client back to the pool
+        client.release();
+    }
+};
+
 
   app.get("/posts/:postId", async (req, res) => {
     const postId = req.params.postId;
@@ -245,4 +327,24 @@ app.delete("/posts/:postId", async (req, res) => {
       res.status(500).json({ error: "Internal Server Error" });
     }
   });
+
+  async function yourDatabaseQueryToFetchPost(postId) {
+    const query = 'SELECT * FROM posts WHERE id = $1';
+    const values = [postId];
+  
+    try {
+      const result = await pool.query(query, values);
+  
+      // Check if a post was found
+      if (result.rows.length === 0) {
+        return null; // Post not found
+      }
+  
+      // Return the first row (assuming postId is unique)
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error fetching post from the database:', error);
+      throw error; // Propagate the error
+    }
+  }
 

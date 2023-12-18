@@ -1,16 +1,18 @@
 <template>
   <div class="post">
     <div class="user-profile">
-      {{ this.$route.query.postAuthor }}
+      {{ postData.author }}
     </div>
     <div class="date">
-      {{ this.$route.query.postCreateTime }}
+      {{ postData.create_time }}
     </div>
-    <p>{{ this.$route.query.postContent }}</p>
+    <textarea v-model="updatedContent" rows="4" cols="50" :placeholder="postData.content"></textarea>
     <div class="post-image">
-      <img :src="this.$route.query.postImgUrl" alt="Post Image" class="post-image" v-if="this.$route.query.postImgUrl" />
+      <img :src="postData.image_url" alt="Post Image" class="post-image" v-if="postData.image_url" />
     </div>
   </div>
+  <button @click="updatePost">Update</button>
+  <button @click="deletePost">Delete</button>
 </template>
   
   <script>
@@ -18,21 +20,101 @@
     name: "PostPageView",
     props: {
       postId: String,
-      postContent: String,
-      postAuthor: String,
-      postCreateTime: String,
-      postImgUrl: String,
+    },
+    data() {
+      return {
+        postData: {
+          postContent: "",
+          postAuthor: "",
+          postCreateTime: "",
+          postImgUrl: "",
+        },
+        updatedContent: "",
+      };
+    },
+    mounted() {
+      this.fetchPostDetails();
     },
     methods: {
-      updatePost() {
-      // Implement logic to update the post in the database
-      // You may want to navigate the user to an update form or use a modal
+    updatePost() {
+      const postId = this.postId;
+
+      fetch(`http://localhost:3000/updateposts/${postId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: this.updatedContent,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to update post: ${response.status} - ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          // Optionally, you can navigate the user back to the homepage or perform other actions
+          console.log(data);
+          this.$router.push("/");
+        })
+        .catch((error) => {
+          console.error('Error:', error.message);
+          // Handle the error as needed
+        });
     },
+
     deletePost() {
       // Implement logic to delete the post from the database
+      const postId = this.postId;
+
+      fetch(`http://localhost:3000/deleteposts/${postId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to delete post: ${response.status} - ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          this.$router.push("/");
+          console.log(data.message); // Log the success message
+          // Optionally, you can navigate the user back to the homepage or perform other actions
+        })
+        .catch((error) => {
+          console.error('Error:', error.message);
+          // Handle the error as needed
+        });
     },
-    }
-  };
+
+    async fetchPostDetails() {
+      try {
+        const response = await fetch(`http://localhost:3000/posts/${this.postId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch post details: ${response.status} - ${response.statusText}`);
+        }
+
+        this.postData = await response.json();
+        console.log("Fetched post data:", this.postData);
+      } catch (error) {
+        console.error(error.message);
+        // Handle the error as needed
+      }
+    },
+  },
+};
+  
   </script>
   
   <style scoped>
@@ -47,12 +129,6 @@
     padding: 0 10px;
     text-align: center;
     font: bold 14px/25px Arial, sans-serif;
-  }
-  
-  
-  .post-container {
-    margin: 20px;
-    text-align: center;
   }
   
   .post {

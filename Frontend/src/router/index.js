@@ -28,10 +28,10 @@ const routes = [{
             import ("../views/PostPageView.vue"),
         props: route => ({
           postId: route.params.postId,
-          postContent: route.query.postContent,
-          postAuthor: route.query.postAuthor,
-          postCreateTime: route.query.postCreateTime,
-          postImgUrl: route.query.postImgUrl,
+        //   postContent: route.query.postContent,
+        //   postAuthor: route.query.postAuthor,
+        //   postCreateTime: route.query.postCreateTime,
+        //   postImgUrl: route.query.postImgUrl,
           // pass other props directly if needed
         }),
       },

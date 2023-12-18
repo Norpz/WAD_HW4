@@ -39,7 +39,7 @@ export default {
       this.$router.push({
       name: 'PostPageView',
       params: { postId: post.id },
-      query: { postContent: post.content, postAuthor: post.author, postCreateTime: post.create_time, postImgUrl: post.image_url},
+      //query: { postContent: post.content, postAuthor: post.author, postCreateTime: post.create_time, postImgUrl: post.image_url},
     });
     },
     async CreatePosts(){
